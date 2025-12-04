@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Who Wants to be a Millionaire</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep-blue: #0a1529;
+            --bg-warm-glow: #2a1a0a;
+            --glass-bg: rgba(20, 30, 50, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --text-snow: #e6f2ff;
+            --text-warm: #ffdaa6;
+            --accent-warm: #ffc06e;
+            --accent-selected: #ff9f43;
+            --accent-correct: #2ecc71;
+            --accent-wrong: #e74c3c;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at center bottom, var(--bg-warm-glow), var(--bg-deep-blue) 70%);
+            color: var(--text-snow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden; /* Prevent scrolling on main body */
+            position: relative;
+        }
+
+        /* --- CSS Snow Animation --- */
+        .snow {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 1;
+            background-image: 
+                radial-gradient(4px 4px at 100px 50px, #fff, transparent),
+                radial-gradient(6px 6px at 200px 150px, #fff, transparent),
+                radial-gradient(3px 3px at 300px 250px, #fff, transparent);
+            background-size: 550px 550px;
+            animation: snowAnim 10s linear infinite; opacity: 0.3;
+        }
+        @keyframes snowAnim { from { transform: translateY(-550px); } to { transform: translateY(0); } }
+
+        /* --- Main Layout --- */
+        #main-container {
+            position: relative; z-index: 10;
+            display: flex; width: 95%; max-width: 1200px; height: 90vh;
+            align-items: center; justify-content: center; gap: 20px;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border); border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        /* --- Setup Panel --- */
+        #setup-panel {
+            position: absolute; z-index: 30; padding: 40px; text-align: center;
+            width: 90%; max-width: 500px;
+            max-height: 90vh; overflow-y: auto;
+        }
+        h1 { color: var(--text-warm); font-weight: 600; margin-bottom: 20px; font-size: 1.8rem; }
+        
+        .divider { margin: 20px 0; border-top: 1px solid rgba(255,255,255,0.1); width: 100%; }
+
+        /* Custom Inputs */
+        input[type="file"] { display: none; }
+        .setup-btn {
+            display: block; width: 100%; margin: 15px 0; padding: 15px;
+            border: 1px solid var(--glass-border); border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05); color: var(--text-snow);
+            cursor: pointer; transition: 0.2s; font-size: 1rem;
+        }
+        .setup-btn:hover { background: rgba(255, 255, 255, 0.15); border-color: var(--accent-warm); color: var(--text-warm); }
+        
+        button.control-btn {
+            background: linear-gradient(135deg, var(--accent-warm), #ad6d2d);
+            border: none; color: #1a0f00; padding: 12px 30px; width: 100%;
+            cursor: pointer; font-size: 1.1rem; font-weight: 600;
+            border-radius: 50px; box-shadow: 0 4px 15px rgba(255, 192, 110, 0.3);
+        }
+        button.control-btn:active { transform: scale(0.98); }
+
+        /* --- Game Area --- */
+        #game-area { display: none; flex: 3; width: 100%; padding: 20px; flex-direction: column; justify-content: center; }
+        
+        .hud {
+            display: flex; justify-content: space-between; color: var(--text-warm);
+            font-size: 1rem; margin-bottom: 20px; border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 10px;
+        }
+
+        .question-box {
+            min-height: 100px; display: flex; align-items: center; justify-content: center;
+            margin-bottom: 20px; font-size: 1.3rem; padding: 20px; text-align: center;
+            background: rgba(10, 20, 35, 0.85); line-height: 1.4;
+        }
+
+        .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+        .answer-btn {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border);
+            border-radius: 30px; color: var(--text-snow); padding: 15px 20px;
+            font-size: 1rem; cursor: pointer; text-align: left; display: flex; align-items: center;
+            min-height: 60px; /* Touch target size */
+        }
+        .answer-btn:active { transform: scale(0.98); }
+        .answer-letter { color: var(--accent-warm); font-weight: 600; margin-right: 10px; font-size: 1.1rem; flex-shrink: 0;}
+
+        /* --- Money Ladder --- */
+        #money-ladder-container {
+            display: none; flex: 1; max-width: 250px; height: 100%;
+            flex-direction: column; justify-content: center; padding: 20px;
+            overflow-y: auto;
+        }
+        .ladder-step {
+            display: flex; justify-content: space-between; padding: 5px 15px; margin: 2px 0;
+            border-radius: 8px; color: var(--text-snow); font-size: 0.9rem; opacity: 0.5;
+        }
+        .ladder-step.active {
+            background: linear-gradient(90deg, rgba(255, 192, 110, 0.2), transparent);
+            border-left: 3px solid var(--accent-warm); color: var(--text-warm); opacity: 1; font-weight: 600;
+        }
+        .ladder-step.milestone { color: white; font-weight: 600; opacity: 0.8; }
+
+        /* --- Confirmation Dialog --- */
+        #confirmation-box {
+            display: none; margin-top: 20px; flex-direction: column; align-items: center; gap: 15px;
+            animation: fadeIn 0.3s ease; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 15px;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        .confirm-text { font-size: 1.1rem; color: var(--text-warm); }
+        .confirm-btn-group { display: flex; gap: 15px; width: 100%; justify-content: center; }
+        .confirm-btn {
+            border: 1px solid var(--glass-border); padding: 10px 30px; border-radius: 20px;
+            font-weight: 600; color: white; flex: 1; max-width: 120px;
+        }
+        .confirm-yes { background: rgba(46, 204, 113, 0.3); border-color: var(--accent-correct); }
+        .confirm-no { background: rgba(231, 76, 60, 0.3); border-color: var(--accent-wrong); }
+
+        /* --- Next Button --- */
+        #next-btn-container {
+            height: 60px; width: 100%; display: flex; align-items: center; justify-content: center;
+            margin-top: 10px; opacity: 0; pointer-events: none; transition: 0.5s;
+        }
+        #next-btn-container.visible { opacity: 1; pointer-events: all; }
+
+        /* --- Preloaded Games Modal --- */
+        #preloaded-modal {
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 40; flex-direction: column; 
+            align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: var(--bg-deep-blue); padding: 30px; width: 90%; max-width: 400px;
+            border-radius: 20px; border: 1px solid var(--accent-warm); text-align: center;
+        }
+        .game-select-btn {
+            display: block; width: 100%; padding: 15px; margin: 10px 0;
+            background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: white; border-radius: 10px; font-size: 1rem;
+        }
+
+        /* --- States --- */
+        .answer-btn.selected { background: rgba(255, 159, 67, 0.3); border-color: var(--accent-selected); color: var(--text-warm); }
+        .answer-btn.correct { background: rgba(46, 204, 113, 0.4) !important; border-color: var(--accent-correct) !important; color: white !important; }
+        .answer-btn.wrong { background: rgba(231, 76, 60, 0.4) !important; border-color: var(--accent-wrong) !important; }
+
+        /* --- MOBILE OPTIMIZATIONS --- */
+        @media (max-width: 900px) {
+            #main-container { flex-direction: column-reverse; height: 100vh; padding: 10px 0; justify-content: flex-end; }
+            
+            /* Make Ladder Horizontal Scroll on Mobile */
+            #money-ladder-container { 
+                flex-direction: row; height: auto; width: 100%; max-width: 100%; 
+                overflow-x: auto; padding: 10px; background: rgba(0,0,0,0.6);
+                border-radius: 0; border: none; border-top: 1px solid var(--glass-border);
+                flex: 0 0 auto; /* Don't grow, stick to content size */
+                white-space: nowrap;
+                order: 1; /* Put at bottom */
+            }
+            #game-area { 
+                order: 2; /* Put above ladder */
+                flex: 1; 
+                justify-content: flex-start;
+                overflow-y: auto; /* Allow question area to scroll if needed */
+                padding-bottom: 0;
+            }
+
+            .ladder-step { 
+                margin: 0 5px; min-width: 80px; font-size: 0.8rem; 
+                flex-direction: column; text-align: center; display: inline-flex; 
+            }
+            .ladder-step.active { border-left: none; border-bottom: 3px solid var(--accent-warm); transform: scale(1.05); }
+
+            .answers-grid { grid-template-columns: 1fr; gap: 10px; }
+            .question-box { font-size: 1.1rem; padding: 15px; min-height: 80px; }
+            h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="snow"></div>
+
+    <div id="main-container">
+        <div id="game-area" class="glass-panel">
+            <div class="hud">
+                <span id="score-display">Q: 1</span>
+                <span id="current-money-display">$0</span>
+            </div>
+
+            <div class="question-box glass-panel" id="question-text">Loading...</div>
+
+            <div class="answers-grid">
+                <button class="answer-btn" id="btn-A" onclick="selectAnswer('A')"><span class="answer-letter">A</span> <span id="text-A"></span></button>
+                <button class="answer-btn" id="btn-B" onclick="selectAnswer('B')"><span class="answer-letter">B</span> <span id="text-B"></span></button>
+                <button class="answer-btn" id="btn-C" onclick="selectAnswer('C')"><span class="answer-letter">C</span> <span id="text-C"></span></button>
+                <button class="answer-btn" id="btn-D" onclick="selectAnswer('D')"><span class="answer-letter">D</span> <span id="text-D"></span></button>
+            </div>
+
+            <div id="confirmation-box">
+                <div class="confirm-text">Final Answer?</div>
+                <div class="confirm-btn-group">
+                    <button class="confirm-btn confirm-yes" onclick="handleConfirmation(true)">YES</button>
+                    <button class="confirm-btn confirm-no" onclick="handleConfirmation(false)">NO</button>
+                </div>
+            </div>
+
+            <div id="next-btn-container">
+                <button class="control-btn" id="next-btn" onclick="nextQuestion()">Next Question</button>
+            </div>
+        </div>
+
+        <div id="money-ladder-container" class="glass-panel"></div>
+    </div>
+
+    <div id="preloaded-modal">
+        <div class="modal-content glass-panel">
+            <h2>Select Game</h2>
+            <div id="preloaded-list">
+                </div>
+            <button class="setup-btn" onclick="closePreloadedMenu()" style="margin-top:20px; border-color: var(--accent-wrong);">Cancel</button>
+        </div>
+    </div>
+
+    <div id="setup-panel" class="glass-panel">
+        <h1>Millionaire Mobile</h1>
+        <p style="color: var(--text-snow); font-size: 0.9rem;">Choose a preloaded game or upload your own.</p>
+        
+        <button class="setup-btn" onclick="showPreloadedMenu()" style="border-color: var(--accent-warm); font-weight: bold;">
+            🎮 &nbsp; Choose Preloaded Game
+        </button>
+
+        <div class="divider"></div>
+
+        <label for="fileInput" class="setup-btn" id="fileLabel">
+            📂 &nbsp; Upload .txt File
+        </label>
+        <input type="file" id="fileInput" accept=".txt" onchange="updateFileName()">
+        
+        <button class="control-btn" onclick="processFile()">Start Uploaded Game</button>
+        
+        <p id="error-msg" style="color: var(--accent-wrong); display: none; margin-top: 15px; font-size: 0.9rem;">Invalid file format.</p>
+    </div>
+
+    <script>
+        /* ================================================================
+        STORE YOUR HARDCODED GAMES HERE 
+        Format: "Question | OptA | OptB | OptC | OptD | CorrectLetter"
+        ================================================================
+        */
+        const PRELOADED_GAMES = {
+            "General Knowledge": [
+                "Which planet is known as the Red Planet? | Earth | Mars | Jupiter | Venus | B",
+                "What is the capital of France? | London | Berlin | Madrid | Paris | D",
+                "Which element has the chemical symbol 'O'? | Gold | Oxygen | Osmium | Olivine | B",
+                "Who painted the Mona Lisa? | Van Gogh | Picasso | Da Vinci | Rembrandt | C",
+                "What is the largest ocean on Earth? | Atlantic | Indian | Arctic | Pacific | D"
+            ],
+            "Science & Nature": [
+                "What is the powerhouse of the cell? | Nucleus | Mitochondria | Ribosome | Cytoplasm | B",
+                "How many bones are in the adult human body? | 206 | 208 | 210 | 212 | A",
+                "What gas do plants absorb from the atmosphere? | Oxygen | Nitrogen | Carbon Dioxide | Helium | C",
+                "What is the speed of light? | 300,000 km/s | 150,000 km/s | 1,000 km/s | 340 m/s | A"
+            ],
+            "Eurovision Trivia": [
+                "In which year was the first Eurovision Song Contest held? | 1950 | 1956 | 1960 | 1974 | B",
+                "Who was the first ever winner of Eurovision? | ABBA | Celine Dion | Lys Assia | Cliff Richard | C",
+                "Which famous band won in 1974 with 'Waterloo'? | The Beatles | Queen | ABBA | Rolling Stones | C",
+                "What is the maximum length allowed for a song? | 2 minutes | 3 minutes | 4 minutes | 5 minutes | B"
+            ]
+        };
+
+        /* ================= GAME LOGIC ================= */
+
+        let questions = [];
+        let prizeLadder = []; 
+        let currentQuestionIndex = 0;
+        let isLocked = false; 
+        let pendingLetter = null;
+
+        const setupPanel = document.getElementById('setup-panel');
+        const preloadedModal = document.getElementById('preloaded-modal');
+        const gameArea = document.getElementById('game-area');
+        const ladderContainer = document.getElementById('money-ladder-container');
+        const questionText = document.getElementById('question-text');
+        const currentMoneyDisplay = document.getElementById('current-money-display');
+        const nextBtn = document.getElementById('next-btn');
+        const nextBtnContainer = document.getElementById('next-btn-container');
+        const confirmBox = document.getElementById('confirmation-box');
+
+        // --- Preloaded Game Menu Logic ---
+        function showPreloadedMenu() {
+            const list = document.getElementById('preloaded-list');
+            list.innerHTML = '';
+            
+            Object.keys(PRELOADED_GAMES).forEach(key => {
+                const btn = document.createElement('button');
+                btn.className = 'game-select-btn';
+                btn.innerText = key + ` (${PRELOADED_GAMES[key].length} Qs)`;
+                btn.onclick = () => loadPreloadedGame(key);
+                list.appendChild(btn);
+            });
+
+            preloadedModal.style.display = 'flex';
+        }
+
+        function closePreloadedMenu() {
+            preloadedModal.style.display = 'none';
+        }
+
+        function loadPreloadedGame(gameName) {
+            const gameData = PRELOADED_GAMES[gameName];
+            // Convert array back to newline separated string to reuse parser
+            parseQuestions(gameData.join('\n'));
+            closePreloadedMenu();
+        }
+
+        // --- File Upload Logic ---
+        function updateFileName() {
+            const input = document.getElementById('fileInput');
+            const label = document.getElementById('fileLabel');
+            if (input.files && input.files.length > 0) {
+                label.innerText = "📄 " + input.files[0].name;
+                label.style.borderColor = "var(--accent-warm)";
+                label.style.color = "var(--text-warm)";
+            }
+        }
+
+        function processFile() {
+            const file = document.getElementById('fileInput').files[0];
+            if (!file) { alert("Please select a file."); return; }
+            const reader = new FileReader();
+            reader.onload = (e) => parseQuestions(e.target.result);
+            reader.readAsText(file);
+        }
+
+        // --- Core Game Functions ---
+        function parseQuestions(text) {
+            questions = [];
+            const lines = text.split('\n');
+            for (let line of lines) {
+                if (line.trim() === "") continue;
+                const parts = line.split('|').map(item => item.trim());
+                if (parts.length >= 6) {
+                    questions.push({
+                        q: parts[0],
+                        options: { A: parts[1], B: parts[2], C: parts[3], D: parts[4] },
+                        correct: parts[5].toUpperCase()
+                    });
+                }
+            }
+
+            if (questions.length > 0) {
+                generateDoublingLadder(questions.length);
+                startGame();
+            } else {
+                document.getElementById('error-msg').style.display = 'block';
+            }
+        }
+
+        function generateDoublingLadder(count) {
+            prizeLadder = [];
+            const MAX_PRIZE = 1000000;
+            for (let i = 0; i < count; i++) {
+                const distance = (count - 1) - i;
+                let value = MAX_PRIZE / Math.pow(2, distance);
+                
+                if (value >= 1000) {
+                    value = Math.round(value / 500) * 500;
+                } else {
+                    value = Math.round(value / 50) * 50;
+                }
+                if (value === 0) value = 50;
+                prizeLadder.push(value);
+            }
+        }
+
+        function renderLadder() {
+            ladderContainer.innerHTML = '';
+            ladderContainer.style.display = 'flex';
+            for (let i = prizeLadder.length - 1; i >= 0; i--) {
+                const step = document.createElement('div');
+                step.className = 'ladder-step';
+                if (prizeLadder[i] === 1000000) step.classList.add('milestone');
+                step.id = `ladder-${i}`;
+                
+                const numSpan = document.createElement('span');
+                numSpan.innerText = i + 1;
+                const valSpan = document.createElement('span');
+                valSpan.innerText = "$" + prizeLadder[i].toLocaleString();
+                
+                step.appendChild(numSpan);
+                step.appendChild(valSpan);
+                ladderContainer.appendChild(step);
+            }
+            updateLadderVisuals();
+            
+            // Auto scroll ladder on mobile to show start
+            if (window.innerWidth <= 900) {
+                 ladderContainer.scrollLeft = ladderContainer.scrollWidth;
+            }
+        }
+
+        function updateLadderVisuals() {
+            for (let i = 0; i < prizeLadder.length; i++) {
+                const el = document.getElementById(`ladder-${i}`);
+                el.classList.remove('active', 'passed', 'future');
+
+                if (i === currentQuestionIndex) {
+                    el.classList.add('active');
+                    // Auto scroll to active element on mobile
+                    if (window.innerWidth <= 900) {
+                        el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                    }
+                } else if (i < currentQuestionIndex) {
+                    el.classList.add('passed'); 
+                } else {
+                    el.classList.add('future');
+                }
+            }
+        }
+
+        function startGame() {
+            setupPanel.style.opacity = '0';
+            setTimeout(() => {
+                setupPanel.style.display = 'none';
+                gameArea.style.display = 'flex';
+                gameArea.style.opacity = '1';
+                renderLadder();
+                currentQuestionIndex = 0;
+                loadQuestion();
+            }, 300);
+        }
+
+        function loadQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                endGame(true);
+                return;
+            }
+
+            isLocked = false;
+            pendingLetter = null;
+            nextBtnContainer.classList.remove('visible');
+            confirmBox.style.display = 'none';
+
+            const data = questions[currentQuestionIndex];
+            const currentPrize = prizeLadder[currentQuestionIndex];
+
+            updateLadderVisuals();
+            document.getElementById('score-display').innerText = `Q: ${currentQuestionIndex + 1} / ${questions.length}`;
+            currentMoneyDisplay.innerHTML = `<span style="color:var(--text-warm)">$${currentPrize.toLocaleString()}</span>`;
+            
+            questionText.style.opacity = 0;
+            setTimeout(() => {
+                 questionText.innerText = data.q;
+                 questionText.style.opacity = 1;
+            }, 200);
+           
+            document.getElementById('text-A').innerText = data.options.A;
+            document.getElementById('text-B').innerText = data.options.B;
+            document.getElementById('text-C').innerText = data.options.C;
+            document.getElementById('text-D').innerText = data.options.D;
+
+            ['A', 'B', 'C', 'D'].forEach(letter => {
+                const btn = document.getElementById(`btn-${letter}`);
+                btn.className = 'answer-btn';
+                btn.disabled = false;
+                btn.classList.remove('selected', 'correct', 'wrong');
+            });
+        }
+
+        function selectAnswer(selectedLetter) {
+            if (isLocked) return;
+            isLocked = true; 
+            pendingLetter = selectedLetter;
+
+            // Remove selected from others just in case
+            ['A','B','C','D'].forEach(l => document.getElementById(`btn-${l}`).classList.remove('selected'));
+            
+            document.getElementById(`btn-${selectedLetter}`).classList.add('selected');
+            confirmBox.style.display = 'flex';
+        }
+
+        function handleConfirmation(confirmed) {
+            confirmBox.style.display = 'none';
+
+            if (!confirmed) {
+                isLocked = false;
+                document.getElementById(`btn-${pendingLetter}`).classList.remove('selected');
+                pendingLetter = null;
+            } else {
+                revealResult();
+            }
+        }
+
+        function revealResult() {
+            const selectedBtn = document.getElementById(`btn-${pendingLetter}`);
+            const currentQ = questions[currentQuestionIndex];
+            
+            setTimeout(() => {
+                selectedBtn.classList.remove('selected');
+
+                if (pendingLetter === currentQ.correct) {
+                    selectedBtn.classList.add('correct');
+                    nextBtnContainer.classList.add('visible');
+                } else {
+                    selectedBtn.classList.add('wrong');
+                    document.getElementById(`btn-${currentQ.correct}`).classList.add('correct');
+                    endGame(false);
+                }
+            }, 1500);
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            loadQuestion();
+        }
+
+        function endGame(won) {
+            nextBtnContainer.classList.add('visible');
+            nextBtn.innerText = "Back to Menu";
+            nextBtn.onclick = () => location.reload();
+
+            if (won) {
+                questionText.innerHTML = `<span style='color:var(--text-warm); font-size: 1.5rem;'>CONGRATULATIONS!<br>You are a Millionaire!</span>`;
+            } else {
+                questionText.innerHTML = "<span style='color:var(--accent-wrong); font-size: 1.5rem;'>GAME OVER</span><br>Better luck next time.";
+            }
+            document.querySelector('.answers-grid').style.opacity = '0.5';
+            document.querySelector('.answers-grid').style.pointerEvents = 'none';
+        }
+    </script>
+</body>
+</html>
