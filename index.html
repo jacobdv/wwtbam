@@ -31,7 +31,7 @@
             justify-content: center;
             min-height: 100vh;
             margin: 0;
-            overflow: hidden; /* Prevent scrolling on main body */
+            overflow: hidden;
             position: relative;
         }
 
@@ -71,7 +71,6 @@
         
         .divider { margin: 20px 0; border-top: 1px solid rgba(255,255,255,0.1); width: 100%; }
 
-        /* Custom Inputs */
         input[type="file"] { display: none; }
         .setup-btn {
             display: block; width: 100%; margin: 15px 0; padding: 15px;
@@ -110,7 +109,7 @@
             background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border);
             border-radius: 30px; color: var(--text-snow); padding: 15px 20px;
             font-size: 1rem; cursor: pointer; text-align: left; display: flex; align-items: center;
-            min-height: 60px; /* Touch target size */
+            min-height: 60px;
         }
         .answer-btn:active { transform: scale(0.98); }
         .answer-letter { color: var(--accent-warm); font-weight: 600; margin-right: 10px; font-size: 1.1rem; flex-shrink: 0;}
@@ -118,7 +117,9 @@
         /* --- Money Ladder --- */
         #money-ladder-container {
             display: none; flex: 1; max-width: 250px; height: 100%;
-            flex-direction: column; justify-content: center; padding: 20px;
+            /* Desktop: Column Reverse puts first element (Lowest $) at bottom, Last ($1M) at top */
+            flex-direction: column-reverse; 
+            justify-content: center; padding: 20px;
             overflow-y: auto;
         }
         .ladder-step {
@@ -180,23 +181,27 @@
             
             /* Make Ladder Horizontal Scroll on Mobile */
             #money-ladder-container { 
-                flex-direction: row; height: auto; width: 100%; max-width: 100%; 
-                overflow-x: auto; padding: 10px; background: rgba(0,0,0,0.6);
+                /* Mobile: Row puts first element (Lowest $) at Left, Last ($1M) at Right */
+                flex-direction: row; 
+                height: auto; width: 100%; max-width: 100%; 
+                overflow-x: auto; 
+                
+                /* INCREASED PADDING HERE: 80px on sides to prevent cutoff */
+                padding: 15px 80px;
+                
+                background: rgba(0,0,0,0.6);
                 border-radius: 0; border: none; border-top: 1px solid var(--glass-border);
-                flex: 0 0 auto; /* Don't grow, stick to content size */
+                flex: 0 0 auto; 
                 white-space: nowrap;
-                order: 1; /* Put at bottom */
+                order: 1;
             }
             #game-area { 
-                order: 2; /* Put above ladder */
-                flex: 1; 
-                justify-content: flex-start;
-                overflow-y: auto; /* Allow question area to scroll if needed */
-                padding-bottom: 0;
+                order: 2; flex: 1; 
+                justify-content: flex-start; overflow-y: auto; padding-bottom: 0;
             }
 
             .ladder-step { 
-                margin: 0 5px; min-width: 80px; font-size: 0.8rem; 
+                margin: 0 10px; min-width: 80px; font-size: 0.8rem; 
                 flex-direction: column; text-align: center; display: inline-flex; 
             }
             .ladder-step.active { border-left: none; border-bottom: 3px solid var(--accent-warm); transform: scale(1.05); }
@@ -230,8 +235,8 @@
             <div id="confirmation-box">
                 <div class="confirm-text">Final Answer?</div>
                 <div class="confirm-btn-group">
-                    <button class="confirm-btn confirm-yes" onclick="handleConfirmation(true)">YES</button>
                     <button class="confirm-btn confirm-no" onclick="handleConfirmation(false)">NO</button>
+                    <button class="confirm-btn confirm-yes" onclick="handleConfirmation(true)">YES</button>
                 </div>
             </div>
 
@@ -273,11 +278,6 @@
     </div>
 
     <script>
-        /* ================================================================
-        STORE YOUR HARDCODED GAMES HERE 
-        Format: "Question | OptA | OptB | OptC | OptD | CorrectLetter"
-        ================================================================
-        */
         const PRELOADED_GAMES = {
             "General Knowledge": [
                 "Which planet is known as the Red Planet? | Earth | Mars | Jupiter | Venus | B",
@@ -300,8 +300,6 @@
             ]
         };
 
-        /* ================= GAME LOGIC ================= */
-
         let questions = [];
         let prizeLadder = []; 
         let currentQuestionIndex = 0;
@@ -318,7 +316,6 @@
         const nextBtnContainer = document.getElementById('next-btn-container');
         const confirmBox = document.getElementById('confirmation-box');
 
-        // --- Preloaded Game Menu Logic ---
         function showPreloadedMenu() {
             const list = document.getElementById('preloaded-list');
             list.innerHTML = '';
@@ -340,12 +337,10 @@
 
         function loadPreloadedGame(gameName) {
             const gameData = PRELOADED_GAMES[gameName];
-            // Convert array back to newline separated string to reuse parser
             parseQuestions(gameData.join('\n'));
             closePreloadedMenu();
         }
 
-        // --- File Upload Logic ---
         function updateFileName() {
             const input = document.getElementById('fileInput');
             const label = document.getElementById('fileLabel');
@@ -364,7 +359,6 @@
             reader.readAsText(file);
         }
 
-        // --- Core Game Functions ---
         function parseQuestions(text) {
             questions = [];
             const lines = text.split('\n');
@@ -408,7 +402,11 @@
         function renderLadder() {
             ladderContainer.innerHTML = '';
             ladderContainer.style.display = 'flex';
-            for (let i = prizeLadder.length - 1; i >= 0; i--) {
+            
+            // Loop from 0 to Length.
+            // On Desktop (Column-Reverse): 0 is Bottom, Length is Top.
+            // On Mobile (Row): 0 is Left, Length is Right.
+            for (let i = 0; i < prizeLadder.length; i++) {
                 const step = document.createElement('div');
                 step.className = 'ladder-step';
                 if (prizeLadder[i] === 1000000) step.classList.add('milestone');
@@ -425,9 +423,9 @@
             }
             updateLadderVisuals();
             
-            // Auto scroll ladder on mobile to show start
+            // On mobile, reset scroll to left (start)
             if (window.innerWidth <= 900) {
-                 ladderContainer.scrollLeft = ladderContainer.scrollWidth;
+                 ladderContainer.scrollLeft = 0;
             }
         }
 
@@ -438,7 +436,6 @@
 
                 if (i === currentQuestionIndex) {
                     el.classList.add('active');
-                    // Auto scroll to active element on mobile
                     if (window.innerWidth <= 900) {
                         el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
                     }
@@ -503,10 +500,7 @@
             if (isLocked) return;
             isLocked = true; 
             pendingLetter = selectedLetter;
-
-            // Remove selected from others just in case
             ['A','B','C','D'].forEach(l => document.getElementById(`btn-${l}`).classList.remove('selected'));
-            
             document.getElementById(`btn-${selectedLetter}`).classList.add('selected');
             confirmBox.style.display = 'flex';
         }
@@ -552,9 +546,9 @@
             nextBtn.onclick = () => location.reload();
 
             if (won) {
-                questionText.innerHTML = `<span style='color:var(--text-warm); font-size: 1.5rem;'>CONGRATULATIONS!<br>You are a Millionaire!</span>`;
+                questionText.innerHTML = `<span style='color:var(--text-warm); font-size: 1.5rem;'>CONGRATULATIONS! You are a Millionaire!</span>`;
             } else {
-                questionText.innerHTML = "<span style='color:var(--accent-wrong); font-size: 1.5rem;'>GAME OVER</span><br>Better luck next time.";
+                questionText.innerHTML = "<span style='color:var(--accent-wrong); font-size: 1.5rem;'>GAME OVER. Better luck next time.</span>";
             }
             document.querySelector('.answers-grid').style.opacity = '0.5';
             document.querySelector('.answers-grid').style.pointerEvents = 'none';
