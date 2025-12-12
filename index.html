@@ -117,7 +117,6 @@
         /* --- Money Ladder --- */
         #money-ladder-container {
             display: none; flex: 1; max-width: 250px; height: 100%;
-            /* Desktop: Column Reverse puts first element (Lowest $) at bottom, Last ($1M) at top */
             flex-direction: column-reverse; 
             justify-content: center; padding: 20px;
             overflow-y: auto;
@@ -179,16 +178,11 @@
         @media (max-width: 900px) {
             #main-container { flex-direction: column-reverse; height: 100vh; padding: 10px 0; justify-content: flex-end; }
             
-            /* Make Ladder Horizontal Scroll on Mobile */
             #money-ladder-container { 
-                /* Mobile: Row puts first element (Lowest $) at Left, Last ($1M) at Right */
                 flex-direction: row; 
                 height: auto; width: 100%; max-width: 100%; 
                 overflow-x: auto; 
-                
-                /* INCREASED PADDING HERE: 80px on sides to prevent cutoff */
-                padding: 15px 80px;
-                
+                padding: 15px 80px; /* High Padding */
                 background: rgba(0,0,0,0.6);
                 border-radius: 0; border: none; border-top: 1px solid var(--glass-border);
                 flex: 0 0 auto; 
@@ -201,7 +195,7 @@
             }
 
             .ladder-step { 
-                margin: 0 10px; min-width: 80px; font-size: 0.8rem; 
+                margin: 0 5px; min-width: 80px; font-size: 0.8rem; 
                 flex-direction: column; text-align: center; display: inline-flex; 
             }
             .ladder-step.active { border-left: none; border-bottom: 3px solid var(--accent-warm); transform: scale(1.05); }
@@ -363,6 +357,40 @@
                 "St. Lucia's Day, featuring girls wearing wreaths of candles, is celebrated where? | Spain | Sweden | Ireland | Poland | B",
                 "Kwanzaa was created in 1966 to celebrate which heritage? | African American | Native American | Hispanic | Caribbean | A",
                 "Traditionally, what item is hidden inside a British Christmas Pudding for wealth? | A Bean | A Ring | A Silver Coin | A Thimble | C"
+            ],
+            "Cincinnati Bengals": [
+                "Who was selected with the #1 overall pick in the 2020 NFL Draft? | Justin Herbert | Tua Tagovailoa | Joe Burrow | Chase Young | C",
+                "Who has been the Head Coach of the Bengals since 2019? | Marvin Lewis | Zac Taylor | Sean McVay | Kyle Shanahan | B",
+                "Which star Wide Receiver was drafted 5th overall in 2021? | Tee Higgins | Tyler Boyd | Ja'Marr Chase | Justin Jefferson | C",
+                "In 2022, Paul Brown Stadium officially changed its name to what? | Kroger Field | Paycor Stadium | P&G Stadium | Fifth Third Field | B",
+                "Which team did the Bengals face in Super Bowl LVI? | LA Rams | Tampa Bay Buccaneers | KC Chiefs | SF 49ers | A",
+                "What is the nickname of kicker Evan McPherson? | Money Mac | Legatron | The Boot | Greg the Leg | A",
+                "Against which team did the Bengals break their 31-year playoff win drought in the 2021 season? | Steelers | Raiders | Patriots | Titans | B",
+                "Which defensive coordinator is credited with the team's halftime adjustments? | Lou Anarumo | Brian Callahan | Dan Pitcher | Dick LeBeau | A",
+                "What is the name of the mascot of the Cincinnati Bengals? | Pounce | Stripes | Who Dey | Bengie | C",
+                "Sam Hubbard's historic 98-yard fumble return touchdown in the 2022 playoffs was against whom? | Bills | Ravens | Chiefs | Browns | B",
+                "In 2022, the Bengals debuted their 'White Bengal' helmets against which team? | Miami Dolphins | Buffalo Bills | NY Jets | Dallas Cowboys | A",
+                "What nickname did fans give Arrowhead Stadium after the Bengals defeated the Chiefs in the 2021 AFC Championship? | Burrowhead | The Jungle North | Joe's House | Tiger Stadium | A",
+                "How many yards did Ja'Marr Chase record in his record-breaking rookie game vs the Chiefs? | 200 | 266 | 295 | 185 | B",
+                "Which defensive end set the franchise record for most sacks in a single season in 2021? | Sam Hubbard | DJ Reader | Trey Hendrickson | Geno Atkins | C",
+                "Joe Burrow's 2023 contract extension made him the highest-paid player at the time. What was the AAV? | $45 Million | $50 Million | $55 Million | $60 Million | C"
+            ],
+            "Eurovision History": [
+                "Which famous group won Eurovision in 1974 with the song 'Waterloo'? | The Beatles | ABBA | Queen | Spice Girls | B",
+                "Which continent is Australia in, despite competing in Eurovision? | Europe | Asia | Oceania | South America | C",
+                "What is the maximum length allowed for a Eurovision song? | 2 minutes | 3 minutes | 4 minutes | 5 minutes | B",
+                "Which drag queen won for Austria in 2014 with 'Rise Like a Phoenix'? | Conchita Wurst | Verka Serduchka | RuPaul | Dana International | A",
+                "Which country is NOT a member of the 'Big Five' that qualifies automatically? | United Kingdom | Spain | Italy | Portugal | D",
+                "What is the name of the monster-mask wearing band that won for Finland in 2006? | Metallica | KISS | Lordi | Gwar | C",
+                "Which artist is the only woman to have won the contest twice (2012 & 2023)? | Lena | Jamala | Loreen | Netta | C",
+                "In which year was the very first Eurovision Song Contest held? | 1945 | 1956 | 1960 | 1974 | B",
+                "How many people are allowed on stage during a live performance? | 4 | 6 | 8 | 10 | B",
+                "Which famous Canadian singer won the 1988 contest representing Switzerland? | Shania Twain | Celine Dion | Alanis Morissette | Avril Lavigne | B",
+                "Which Irish singer is known as 'Mr. Eurovision' for winning twice as a singer and once as a writer? | Johnny Logan | Bono | Hozier | Enya | A",
+                "What famous interval act debuted during the 1994 contest in Dublin? | Cirque du Soleil | Riverdance | Blue Man Group | The Wiggles | B",
+                "In 1969, how many countries tied for first place in a historic result? | 2 | 3 | 4 | 5 | C",
+                "As of 2024, which two countries share the record for most wins (7 each)? | UK & France | Sweden & Ireland | Germany & Spain | Italy & Netherlands | B",
+                "What is the name of the official orchestral anthem played at the start of the broadcast? | Ode to Joy | Te Deum | Zadok the Priest | The Blue Danube | B"
             ]
         };
 
@@ -503,7 +531,13 @@
                 if (i === currentQuestionIndex) {
                     el.classList.add('active');
                     if (window.innerWidth <= 900) {
-                        el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                        // FIX: If it's the very first question, force scroll to 0 (Left).
+                        // Otherwise, center it.
+                        if (i === 0) {
+                            ladderContainer.scrollLeft = 0;
+                        } else {
+                            el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                        }
                     }
                 } else if (i < currentQuestionIndex) {
                     el.classList.add('passed'); 
