@@ -114,7 +114,7 @@
         .answer-btn:active { transform: scale(0.98); }
         .answer-letter { color: var(--accent-warm); font-weight: 600; margin-right: 10px; font-size: 1.1rem; flex-shrink: 0;}
 
-        /* --- Money Ladder --- */
+        /* --- Money Ladder (Desktop) --- */
         #money-ladder-container {
             display: none; flex: 1; max-width: 250px; height: 100%;
             flex-direction: column-reverse; 
@@ -130,6 +130,22 @@
             border-left: 3px solid var(--accent-warm); color: var(--text-warm); opacity: 1; font-weight: 600;
         }
         .ladder-step.milestone { color: white; font-weight: 600; opacity: 0.8; }
+
+        /* --- Mobile Money Bar (Replaces Ladder on Mobile) --- */
+        #mobile-money-bar {
+            display: none; /* Hidden on desktop */
+            position: fixed;
+            bottom: 0; left: 0; width: 100%;
+            background: rgba(10, 20, 35, 0.95);
+            border-top: 1px solid var(--accent-warm);
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--text-snow);
+            z-index: 50;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+        }
+        #mobile-money-val { color: var(--text-warm); font-weight: bold; margin-left: 10px; }
 
         /* --- Confirmation Dialog --- */
         #confirmation-box {
@@ -176,29 +192,18 @@
 
         /* --- MOBILE OPTIMIZATIONS --- */
         @media (max-width: 900px) {
-            #main-container { flex-direction: column-reverse; height: 100vh; padding: 10px 0; justify-content: flex-end; }
+            #main-container { flex-direction: column; height: auto; min-height: 100vh; padding-bottom: 80px; /* Space for footer */ }
             
-            #money-ladder-container { 
-                flex-direction: row; 
-                height: auto; width: 100%; max-width: 100%; 
-                overflow-x: auto; 
-                padding: 15px 80px; /* High Padding */
-                background: rgba(0,0,0,0.6);
-                border-radius: 0; border: none; border-top: 1px solid var(--glass-border);
-                flex: 0 0 auto; 
-                white-space: nowrap;
-                order: 1;
-            }
-            #game-area { 
-                order: 2; flex: 1; 
-                justify-content: flex-start; overflow-y: auto; padding-bottom: 0;
-            }
+            /* Hide the Ladder completely on mobile */
+            #money-ladder-container { display: none !important; }
+            
+            /* Show the bottom bar */
+            #mobile-money-bar { display: block; }
+            
+            /* Hide the money in the top HUD since it's at bottom now */
+            #current-money-display { display: none; }
 
-            .ladder-step { 
-                margin: 0 5px; min-width: 80px; font-size: 0.8rem; 
-                flex-direction: column; text-align: center; display: inline-flex; 
-            }
-            .ladder-step.active { border-left: none; border-bottom: 3px solid var(--accent-warm); transform: scale(1.05); }
+            #game-area { width: 100%; padding: 20px; border: none; background: transparent; box-shadow: none; }
 
             .answers-grid { grid-template-columns: 1fr; gap: 10px; }
             .question-box { font-size: 1.1rem; padding: 15px; min-height: 80px; }
@@ -242,11 +247,14 @@
         <div id="money-ladder-container" class="glass-panel"></div>
     </div>
 
+    <div id="mobile-money-bar">
+        Playing For: <span id="mobile-money-val">$0</span>
+    </div>
+
     <div id="preloaded-modal">
         <div class="modal-content glass-panel">
             <h2>Select Game</h2>
-            <div id="preloaded-list">
-                </div>
+            <div id="preloaded-list"></div>
             <button class="setup-btn" onclick="closePreloadedMenu()" style="margin-top:20px; border-color: var(--accent-wrong);">Cancel</button>
         </div>
     </div>
@@ -357,40 +365,6 @@
                 "St. Lucia's Day, featuring girls wearing wreaths of candles, is celebrated where? | Spain | Sweden | Ireland | Poland | B",
                 "Kwanzaa was created in 1966 to celebrate which heritage? | African American | Native American | Hispanic | Caribbean | A",
                 "Traditionally, what item is hidden inside a British Christmas Pudding for wealth? | A Bean | A Ring | A Silver Coin | A Thimble | C"
-            ],
-            "Cincinnati Bengals": [
-                "Who was selected with the #1 overall pick in the 2020 NFL Draft? | Justin Herbert | Tua Tagovailoa | Joe Burrow | Chase Young | C",
-                "Who has been the Head Coach of the Bengals since 2019? | Marvin Lewis | Zac Taylor | Sean McVay | Kyle Shanahan | B",
-                "Which star Wide Receiver was drafted 5th overall in 2021? | Tee Higgins | Tyler Boyd | Ja'Marr Chase | Justin Jefferson | C",
-                "In 2022, Paul Brown Stadium officially changed its name to what? | Kroger Field | Paycor Stadium | P&G Stadium | Fifth Third Field | B",
-                "Which team did the Bengals face in Super Bowl LVI? | LA Rams | Tampa Bay Buccaneers | KC Chiefs | SF 49ers | A",
-                "What is the nickname of kicker Evan McPherson? | Money Mac | Legatron | The Boot | Greg the Leg | A",
-                "Against which team did the Bengals break their 31-year playoff win drought in the 2021 season? | Steelers | Raiders | Patriots | Titans | B",
-                "Which defensive coordinator is credited with the team's halftime adjustments? | Lou Anarumo | Brian Callahan | Dan Pitcher | Dick LeBeau | A",
-                "What is the name of the mascot of the Cincinnati Bengals? | Pounce | Stripes | Who Dey | Bengie | C",
-                "Sam Hubbard's historic 98-yard fumble return touchdown in the 2022 playoffs was against whom? | Bills | Ravens | Chiefs | Browns | B",
-                "In 2022, the Bengals debuted their 'White Bengal' helmets against which team? | Miami Dolphins | Buffalo Bills | NY Jets | Dallas Cowboys | A",
-                "What nickname did fans give Arrowhead Stadium after the Bengals defeated the Chiefs in the 2021 AFC Championship? | Burrowhead | The Jungle North | Joe's House | Tiger Stadium | A",
-                "How many yards did Ja'Marr Chase record in his record-breaking rookie game vs the Chiefs? | 200 | 266 | 295 | 185 | B",
-                "Which defensive end set the franchise record for most sacks in a single season in 2021? | Sam Hubbard | DJ Reader | Trey Hendrickson | Geno Atkins | C",
-                "Joe Burrow's 2023 contract extension made him the highest-paid player at the time. What was the AAV? | $45 Million | $50 Million | $55 Million | $60 Million | C"
-            ],
-            "Eurovision History": [
-                "Which famous group won Eurovision in 1974 with the song 'Waterloo'? | The Beatles | ABBA | Queen | Spice Girls | B",
-                "Which continent is Australia in, despite competing in Eurovision? | Europe | Asia | Oceania | South America | C",
-                "What is the maximum length allowed for a Eurovision song? | 2 minutes | 3 minutes | 4 minutes | 5 minutes | B",
-                "Which drag queen won for Austria in 2014 with 'Rise Like a Phoenix'? | Conchita Wurst | Verka Serduchka | RuPaul | Dana International | A",
-                "Which country is NOT a member of the 'Big Five' that qualifies automatically? | United Kingdom | Spain | Italy | Portugal | D",
-                "What is the name of the monster-mask wearing band that won for Finland in 2006? | Metallica | KISS | Lordi | Gwar | C",
-                "Which artist is the only woman to have won the contest twice (2012 & 2023)? | Lena | Jamala | Loreen | Netta | C",
-                "In which year was the very first Eurovision Song Contest held? | 1945 | 1956 | 1960 | 1974 | B",
-                "How many people are allowed on stage during a live performance? | 4 | 6 | 8 | 10 | B",
-                "Which famous Canadian singer won the 1988 contest representing Switzerland? | Shania Twain | Celine Dion | Alanis Morissette | Avril Lavigne | B",
-                "Which Irish singer is known as 'Mr. Eurovision' for winning twice as a singer and once as a writer? | Johnny Logan | Bono | Hozier | Enya | A",
-                "What famous interval act debuted during the 1994 contest in Dublin? | Cirque du Soleil | Riverdance | Blue Man Group | The Wiggles | B",
-                "In 1969, how many countries tied for first place in a historic result? | 2 | 3 | 4 | 5 | C",
-                "As of 2024, which two countries share the record for most wins (7 each)? | UK & France | Sweden & Ireland | Germany & Spain | Italy & Netherlands | B",
-                "What is the name of the official orchestral anthem played at the start of the broadcast? | Ode to Joy | Te Deum | Zadok the Priest | The Blue Danube | B"
             ]
         };
 
@@ -406,6 +380,7 @@
         const ladderContainer = document.getElementById('money-ladder-container');
         const questionText = document.getElementById('question-text');
         const currentMoneyDisplay = document.getElementById('current-money-display');
+        const mobileMoneyVal = document.getElementById('mobile-money-val');
         const nextBtn = document.getElementById('next-btn');
         const nextBtnContainer = document.getElementById('next-btn-container');
         const confirmBox = document.getElementById('confirmation-box');
@@ -496,11 +471,7 @@
         function renderLadder() {
             ladderContainer.innerHTML = '';
             ladderContainer.style.display = 'flex';
-            
-            // Loop from 0 to Length.
-            // On Desktop (Column-Reverse): 0 is Bottom, Length is Top.
-            // On Mobile (Row): 0 is Left, Length is Right.
-            for (let i = 0; i < prizeLadder.length; i++) {
+            for (let i = prizeLadder.length - 1; i >= 0; i--) {
                 const step = document.createElement('div');
                 step.className = 'ladder-step';
                 if (prizeLadder[i] === 1000000) step.classList.add('milestone');
@@ -516,11 +487,6 @@
                 ladderContainer.appendChild(step);
             }
             updateLadderVisuals();
-            
-            // On mobile, reset scroll to left (start)
-            if (window.innerWidth <= 900) {
-                 ladderContainer.scrollLeft = 0;
-            }
         }
 
         function updateLadderVisuals() {
@@ -530,15 +496,6 @@
 
                 if (i === currentQuestionIndex) {
                     el.classList.add('active');
-                    if (window.innerWidth <= 900) {
-                        // FIX: If it's the very first question, force scroll to 0 (Left).
-                        // Otherwise, center it.
-                        if (i === 0) {
-                            ladderContainer.scrollLeft = 0;
-                        } else {
-                            el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-                        }
-                    }
                 } else if (i < currentQuestionIndex) {
                     el.classList.add('passed'); 
                 } else {
@@ -577,6 +534,9 @@
             document.getElementById('score-display').innerText = `Q: ${currentQuestionIndex + 1} / ${questions.length}`;
             currentMoneyDisplay.innerHTML = `<span style="color:var(--text-warm)">$${currentPrize.toLocaleString()}</span>`;
             
+            // Update the MOBILE BAR
+            mobileMoneyVal.innerText = `$${currentPrize.toLocaleString()}`;
+
             questionText.style.opacity = 0;
             setTimeout(() => {
                  questionText.innerText = data.q;
@@ -646,9 +606,9 @@
             nextBtn.onclick = () => location.reload();
 
             if (won) {
-                questionText.innerHTML = `<span style='color:var(--text-warm); font-size: 1.5rem;'>CONGRATULATIONS! You are a Millionaire!</span>`;
+                questionText.innerHTML = `<span style='color:var(--text-warm); font-size: 1.5rem;'>CONGRATULATIONS!<br>You are a Millionaire!</span>`;
             } else {
-                questionText.innerHTML = "<span style='color:var(--accent-wrong); font-size: 1.5rem;'>GAME OVER. Better luck next time.</span>";
+                questionText.innerHTML = "<span style='color:var(--accent-wrong); font-size: 1.5rem;'>GAME OVER</span><br>Better luck next time.";
             }
             document.querySelector('.answers-grid').style.opacity = '0.5';
             document.querySelector('.answers-grid').style.pointerEvents = 'none';
